@@ -40,7 +40,7 @@ pub fn sddmm<R: Runtime>(
     sampled_dot::launch::<R>(
         &c.values.client,
         grid,
-        CubeDim::new_1d(128),
+        RudaDim::new_1d(128),
         c.offsets.clone().into_array_arg(),
         c.indices.clone().into_array_arg(),
         c.values.clone().into_array_arg(),
@@ -59,7 +59,7 @@ pub fn sddmm<R: Runtime>(
     Ok(output)
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn sampled_dot(
     offsets: &Array<u32>,
     indices: &Array<u32>,

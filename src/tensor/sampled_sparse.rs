@@ -25,7 +25,7 @@ pub fn sampled_csrgemm<R: Runtime>(
     }
     let rows: RudaTensor<R> = from_data(TensorData::new(rows, [pattern.nnz]), &a.values.device);
     super::sparse_binary::kernel::product::launch::<R>(
-        &a.values.client, grid, CubeDim::new_1d(128),
+        &a.values.client, grid, RudaDim::new_1d(128),
         a.offsets.clone().into_array_arg(), a.indices.clone().into_array_arg(), a.values.clone().into_array_arg(),
         b.offsets.clone().into_array_arg(), b.indices.clone().into_array_arg(), b.values.clone().into_array_arg(),
         rows.into_array_arg(), pattern.indices.clone().into_array_arg(), output.clone().into_array_arg(),

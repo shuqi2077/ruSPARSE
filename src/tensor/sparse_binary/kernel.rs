@@ -1,6 +1,6 @@
 use ruda_kernel::dsl::prelude::*;
 
-#[cube(launch)]
+#[ruda(launch)]
 pub(super) fn sum(
     a_offsets: &Array<u32>,
     a_indices: &Array<u32>,
@@ -47,7 +47,7 @@ pub(super) fn sum(
     }
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 pub(crate) fn product(
     a_offsets: &Array<u32>,
     a_indices: &Array<u32>,

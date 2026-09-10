@@ -96,8 +96,8 @@ pub fn spvv<R: Runtime>(
     );
     dot::launch::<R>(
         &matrix.values.client,
-        CubeCount::Static(1, 1, 1),
-        CubeDim::new_1d(32),
+        RudaCount::Static(1, 1, 1),
+        RudaDim::new_1d(32),
         matrix.indices.clone().into_array_arg(),
         matrix.values.clone().into_array_arg(),
         into_contiguous(y).into_array_arg(),
@@ -109,7 +109,7 @@ pub fn spvv<R: Runtime>(
     Ok(output)
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn dot(
     indices: &Array<u32>,
     values: &Array<f32>,

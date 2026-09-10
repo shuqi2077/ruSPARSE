@@ -95,7 +95,7 @@ pub fn csrgeam<R: Runtime>(
     kernel::sum::launch::<R>(
         &a.values.client,
         grid,
-        CubeDim::new_1d(128),
+        RudaDim::new_1d(128),
         a.offsets.clone().into_array_arg(),
         a.indices.clone().into_array_arg(),
         a.values.clone().into_array_arg(),
@@ -148,7 +148,7 @@ pub fn csrgemm<R: Runtime>(
     kernel::product::launch::<R>(
         &a.values.client,
         grid,
-        CubeDim::new_1d(128),
+        RudaDim::new_1d(128),
         a.offsets.clone().into_array_arg(),
         a.indices.clone().into_array_arg(),
         a.values.clone().into_array_arg(),

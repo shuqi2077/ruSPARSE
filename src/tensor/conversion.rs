@@ -1,6 +1,6 @@
 use super::*;
 use crate::{BsrMatrix, CooMatrix, CscMatrix, DenseMatrix, EllMatrix};
-use ruda_kernel::dsl::calculate_cube_count_elemwise;
+use ruda_kernel::dsl::calculate_ruda_count_elemwise;
 use ruda_kernel::tensor::initialization::zeros;
 use std::collections::BTreeSet;
 
@@ -99,12 +99,12 @@ pub fn csr_to_dense<R: Runtime>(
     let destinations: RudaTensor<R> = from_data(
         TensorData::new(destinations, [count]), &matrix.values.device,
     );
-    let cube_dim = CubeDim::new(matrix.values.client.properties(), count);
-    let cube_count = calculate_cube_count_elemwise(&matrix.values.client, count, cube_dim);
+    let ruda_dim = RudaDim::new(matrix.values.client.properties(), count);
+    let ruda_count = calculate_ruda_count_elemwise(&matrix.values.client, count, ruda_dim);
     scatter_values::launch::<R>(
         &matrix.values.client,
-        cube_count,
-        cube_dim,
+        ruda_count,
+        ruda_dim,
         source_entries.into_array_arg(),
         destinations.into_array_arg(),
         matrix.values.clone().into_array_arg(),
@@ -116,7 +116,7 @@ pub fn csr_to_dense<R: Runtime>(
     Ok(output)
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn scatter_values(
     source_entries: &Array<u32>,
     destinations: &Array<u32>,
@@ -167,10 +167,10 @@ pub fn csr_to_dense_backward<R: Runtime>(
     let entries: RudaTensor<R> = from_data(
         TensorData::new(entries, [count]), &matrix.values.device,
     );
-    let cube_dim = CubeDim::new(matrix.values.client.properties(), count);
-    let cube_count = calculate_cube_count_elemwise(&matrix.values.client, count, cube_dim);
+    let ruda_dim = RudaDim::new(matrix.values.client.properties(), count);
+    let ruda_count = calculate_ruda_count_elemwise(&matrix.values.client, count, ruda_dim);
     scatter_values::launch::<R>(
-        &matrix.values.client, cube_count, cube_dim,
+        &matrix.values.client, ruda_count, ruda_dim,
         source_positions.into_array_arg(), entries.into_array_arg(),
         into_contiguous(grad).into_array_arg(), output.clone().into_array_arg(),
         count as u32, include_str!("conversion.rs").to_owned(),

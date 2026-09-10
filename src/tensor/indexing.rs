@@ -1,5 +1,5 @@
 use super::*;
-use ruda_kernel::{dsl::calculate_cube_count_elemwise, tensor::initialization::zeros};
+use ruda_kernel::{dsl::calculate_ruda_count_elemwise, tensor::initialization::zeros};
 
 pub fn csr_gather<R: Runtime>(matrix: &CsrTensor<R>, dense: RudaTensor<R>) -> Result<RudaTensor<R>, SparseError> {
     matrix.validate_dense(&dense, &[matrix.rows, matrix.columns])?;
@@ -10,10 +10,10 @@ pub fn csr_gather<R: Runtime>(matrix: &CsrTensor<R>, dense: RudaTensor<R>) -> Re
         matrix.values.client.clone(), matrix.values.device.clone(), [matrix.nnz].into(), DType::F32,
     );
     if matrix.nnz == 0 { return Ok(output); }
-    let cube_dim = CubeDim::new(matrix.values.client.properties(), matrix.nnz);
-    let cube_count = calculate_cube_count_elemwise(&matrix.values.client, matrix.nnz, cube_dim);
+    let ruda_dim = RudaDim::new(matrix.values.client.properties(), matrix.nnz);
+    let ruda_count = calculate_ruda_count_elemwise(&matrix.values.client, matrix.nnz, ruda_dim);
     gather::launch::<R>(
-        &matrix.values.client, cube_count, cube_dim,
+        &matrix.values.client, ruda_count, ruda_dim,
         matrix.offsets.clone().into_array_arg(), matrix.indices.clone().into_array_arg(),
         into_contiguous(dense).into_array_arg(), output.clone().into_array_arg(),
         matrix.rows as u32, matrix.columns as u32, matrix.nnz as u32, matrix.base.value(),
@@ -28,10 +28,10 @@ pub fn csr_scatter_add<R: Runtime>(matrix: &CsrTensor<R>) -> Result<RudaTensor<R
     dimension(elements, "CSR scatter output")?;
     let output = zeros::<R>(matrix.values.device.clone(), [matrix.rows, matrix.columns].into(), DType::F32);
     if elements == 0 || matrix.nnz == 0 { return Ok(output); }
-    let cube_dim = CubeDim::new(matrix.values.client.properties(), matrix.rows);
-    let cube_count = calculate_cube_count_elemwise(&matrix.values.client, matrix.rows, cube_dim);
+    let ruda_dim = RudaDim::new(matrix.values.client.properties(), matrix.rows);
+    let ruda_count = calculate_ruda_count_elemwise(&matrix.values.client, matrix.rows, ruda_dim);
     scatter_add::launch::<R>(
-        &matrix.values.client, cube_count, cube_dim,
+        &matrix.values.client, ruda_count, ruda_dim,
         matrix.offsets.clone().into_array_arg(), matrix.indices.clone().into_array_arg(),
         matrix.values.clone().into_array_arg(), output.clone().into_array_arg(),
         matrix.rows as u32, matrix.columns as u32, matrix.base.value(),
@@ -40,7 +40,7 @@ pub fn csr_scatter_add<R: Runtime>(matrix: &CsrTensor<R>) -> Result<RudaTensor<R
     Ok(output)
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn gather(
     offsets: &Array<u32>, indices: &Array<u32>, dense: &Array<f32>, output: &mut Array<f32>,
     rows: u32, columns: u32, nnz: u32, base: u32, #[comptime] _source: String,
@@ -61,7 +61,7 @@ fn gather(
     }
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn scatter_add(
     offsets: &Array<u32>, indices: &Array<u32>, values: &Array<f32>, output: &mut Array<f32>,
     rows: u32, columns: u32, base: u32, #[comptime] _source: String,

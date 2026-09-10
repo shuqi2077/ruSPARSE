@@ -35,7 +35,7 @@ impl<R: Runtime> CsrTensor<R> {
             }
         }
         self.grid(1)?;
-        let grid = CubeCount::Static((self.nnz as u32).div_ceil(128), 1, 1);
+        let grid = RudaCount::Static((self.nnz as u32).div_ceil(128), 1, 1);
         let output = self.from_pattern(self.columns, self.rows, offsets, indices)?;
         let captured = if capture_permutation { permutation.clone() } else { Vec::new() };
         if self.nnz == 0 {
@@ -48,7 +48,7 @@ impl<R: Runtime> CsrTensor<R> {
         gather::launch::<R>(
             &self.values.client,
             grid,
-            CubeDim::new_1d(128),
+            RudaDim::new_1d(128),
             permutation.into_array_arg(),
             self.values.clone().into_array_arg(),
             output.values.clone().into_array_arg(),
@@ -59,7 +59,7 @@ impl<R: Runtime> CsrTensor<R> {
     }
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 fn gather(
     permutation: &Array<u32>,
     values: &Array<f32>,

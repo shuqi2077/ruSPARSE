@@ -150,12 +150,12 @@ impl<R: Runtime> CsrTensor<R> {
         Ok(())
     }
 
-    fn grid(&self, elements: usize) -> Result<CubeCount, SparseError> {
+    fn grid(&self, elements: usize) -> Result<RudaCount, SparseError> {
         let elements = dimension(elements, "sparse output")?;
         let hardware = &self.values.client.properties().hardware;
         if hardware.plane_size_min != 32
             || hardware.plane_size_max != 32
-            || hardware.max_cube_dim.0 < 128
+            || hardware.max_ruda_dim.0 < 128
         {
             return Err(SparseError::Device(
                 "row-split sparse kernels require 32-lane planes and 128-thread blocks",
@@ -164,7 +164,7 @@ impl<R: Runtime> CsrTensor<R> {
         let lanes = elements
             .checked_mul(32)
             .ok_or(SparseError::SizeOverflow("sparse launch lanes"))?;
-        Ok(CubeCount::Static(lanes.div_ceil(128), 1, 1))
+        Ok(RudaCount::Static(lanes.div_ceil(128), 1, 1))
     }
 }
 
@@ -191,7 +191,7 @@ pub fn csrmv<R: Runtime>(
     kernel::csrmv::launch::<R>(
         &matrix.values.client,
         grid,
-        CubeDim::new_1d(128),
+        RudaDim::new_1d(128),
         matrix.offsets.clone().into_array_arg(),
         matrix.indices.clone().into_array_arg(),
         matrix.values.clone().into_array_arg(),
@@ -268,7 +268,7 @@ pub fn csrmm<R: Runtime>(
     kernel::csrmm::launch::<R>(
         &matrix.values.client,
         grid,
-        CubeDim::new_1d(128),
+        RudaDim::new_1d(128),
         matrix.offsets.clone().into_array_arg(),
         matrix.indices.clone().into_array_arg(),
         matrix.values.clone().into_array_arg(),

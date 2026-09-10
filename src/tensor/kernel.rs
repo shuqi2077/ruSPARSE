@@ -1,6 +1,6 @@
 use ruda_kernel::dsl::prelude::*;
 
-#[cube(launch)]
+#[ruda(launch)]
 pub(super) fn csrmv(
     offsets: &Array<u32>,
     indices: &Array<u32>,
@@ -33,7 +33,7 @@ pub(super) fn csrmv(
     }
 }
 
-#[cube(launch)]
+#[ruda(launch)]
 pub(super) fn csrmm(
     offsets: &Array<u32>,
     indices: &Array<u32>,

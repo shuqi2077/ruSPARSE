@@ -33,7 +33,7 @@ Das Beispiel berechnet `alpha * A * x + beta * y`, liest das Ergebnis synchron z
 
 ## ruSPARSE Benutzerhandbuch
 
-[Computerbibliotheken](../../../../docs/de/libraries/README.md) · [中文](../zh/README.md)
+[Computerbibliotheken](../../../docs/de/libraries/README.md) · [中文](../zh/README.md)
 
 ### 1. Übersicht
 

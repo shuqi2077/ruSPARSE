@@ -33,7 +33,7 @@ cargo run -p ruSPARSE --features cuda --example csrmv
 
 ## ruSPARSE Руководство пользователя
 
-[Вычислительные библиотеки](../../../../docs/ru/libraries/README.md) · [中文](../zh/README.md)
+[Вычислительные библиотеки](../../../docs/ru/libraries/README.md) · [中文](../zh/README.md)
 
 ### 1. Обзор
 
